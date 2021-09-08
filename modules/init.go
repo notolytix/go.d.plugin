@@ -23,6 +23,7 @@ import (
 	_ "github.com/netdata/go.d.plugin/modules/freeradius"
 	_ "github.com/netdata/go.d.plugin/modules/geth"
 	_ "github.com/netdata/go.d.plugin/modules/haproxy"
+	_ "github.com/netdata/go.d.plugin/modules/hbase"
 	_ "github.com/netdata/go.d.plugin/modules/hdfs"
 	_ "github.com/netdata/go.d.plugin/modules/httpcheck"
 	_ "github.com/netdata/go.d.plugin/modules/isc_dhcpd"
