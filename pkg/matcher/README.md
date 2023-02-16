@@ -1,4 +1,13 @@
-# Supported Format
+<!--
+title: "matcher"
+custom_edit_url: "https://github.com/netdata/go.d.plugin/edit/master/pkg/matcher/README.md"
+sidebar_label: "matcher"
+learn_status: "Published"
+learn_rel_path: "Developers/External plugins/go.d.plugin/Helper Packages"
+-->
+
+# matcher
+## Supported Format
 
 * string
 * glob
@@ -7,12 +16,12 @@
 
 Depending on the symbol at the start of the string, the `matcher` will use one of the supported formats.
 
-matcher | short format | long format
- ------ | ------------ | ----------
-string | ` =` | `string`
-glob | `*` | `glob`
-regexp | `~` | `regexp`
-simple patterns | | `simple_patterns`
+| matcher         | short format | long format       |
+|-----------------|--------------|-------------------|
+| string          | ` =`         | `string`          |
+| glob            | `*`          | `glob`            |
+| regexp          | `~`          | `regexp`          |
+| simple patterns |              | `simple_patterns` |
 
 Example:
 

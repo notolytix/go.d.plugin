@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package dnsmasq
 
 import (
@@ -110,7 +112,7 @@ func TestDnsmasq_Collect(t *testing.T) {
 		"success on valid response": {
 			prepare: prepareOKDnsmasq,
 			wantCollected: map[string]int64{
-				"auth":           5,
+				//"auth":           5,
 				"cachesize":      999,
 				"evictions":      5,
 				"failed_queries": 9,

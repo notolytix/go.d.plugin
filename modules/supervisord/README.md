@@ -1,8 +1,11 @@
 <!--
 title: "Supervisord monitoring with Netdata"
 description: "Monitor the processes running by Supervisor with zero configuration, per-second metric granularity, and interactive visualizations."
-custom_edit_url: https://github.com/netdata/go.d.plugin/edit/master/modules/supervisord/README.md
+custom_edit_url: "https://github.com/netdata/go.d.plugin/edit/master/modules/supervisord/README.md"
 sidebar_label: "Supervisord"
+learn_status: "Published"
+learn_topic_type: "References"
+learn_rel_path: "Integrations/Monitor/Virtualized environments/Virtualize hosts"
 -->
 
 # Supervisord monitoring with Netdata
@@ -20,19 +23,18 @@ Used methods:
 
 - [`supervisor.getAllProcessInfo`](http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.getAllProcessInfo)
 
-## Charts
+## Metrics
 
-Summary charts:
+All metrics have "supervisord." prefix.
 
-- Processes in `processes`
-
-Processes groups charts:
-
-- Processes in `processes`
-- State code in `code`
-- Exit status in `status`
-- Uptime in `seconds`
-- Downtime in `seconds`
+| Metric              |     Scope     |           Dimensions           |    Units    |
+|---------------------|:-------------:|:------------------------------:|:-----------:|
+| summary_processes   |    global     |      running, non-running      |  processes  |
+| processes           | process group |      running, non-running      |  processes  |
+| process_state_code  | process group | <i>a dimension per process</i> |    code     |
+| process_exit_status | process group | <i>a dimension per process</i> | exit status |
+| process_uptime      | process group | <i>a dimension per process</i> |   seconds   |
+| process_downtime    | process group | <i>a dimension per process</i> |   seconds   |
 
 ## Configuration
 
@@ -67,17 +69,21 @@ collector's [configuration file](https://github.com/netdata/go.d.plugin/blob/mas
 To troubleshoot issues with the `supervisord` collector, run the `go.d.plugin` with the debug option enabled. The output
 should give you clues as to why the collector isn't working.
 
-First, navigate to your plugins directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on your
-system, open `netdata.conf` and look for the setting `plugins directory`. Once you're in the plugin's directory, switch
-to the `netdata` user.
+- Navigate to the `plugins.d` directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on
+  your system, open `netdata.conf` and look for the `plugins` setting under `[directories]`.
 
-```bash
-cd /usr/libexec/netdata/plugins.d/
-sudo -u netdata -s
-```
+  ```bash
+  cd /usr/libexec/netdata/plugins.d/
+  ```
 
-You can now run the `go.d.plugin` to debug the collector:
+- Switch to the `netdata` user.
 
-```bash
-./go.d.plugin -d -m supervisord
-```
+  ```bash
+  sudo -u netdata -s
+  ```
+
+- Run the `go.d.plugin` to debug the collector:
+
+  ```bash
+  ./go.d.plugin -d -m supervisord
+  ```

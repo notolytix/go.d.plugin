@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package file
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/netdata/go.d.plugin/agent/job/confgroup"
@@ -20,7 +22,7 @@ const (
 )
 
 func parse(req confgroup.Registry, path string) (*confgroup.Group, error) {
-	bs, err := ioutil.ReadFile(path)
+	bs, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +44,11 @@ func parse(req confgroup.Registry, path string) (*confgroup.Group, error) {
 
 func parseStaticFormat(reg confgroup.Registry, path string, bs []byte) (*confgroup.Group, error) {
 	name := fileName(path)
+	// TODO: properly handle module renaming
+	// See agent/setup.go buildDiscoveryConf() for details
+	if name == "wmi" {
+		name = "windows"
+	}
 	modDef, ok := reg.Lookup(name)
 	if !ok {
 		return nil, nil

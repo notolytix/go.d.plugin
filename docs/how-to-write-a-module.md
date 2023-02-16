@@ -1,7 +1,12 @@
 <!--
-title: How to write a Netdata collector in Go
+title: "How to write a Netdata collector in Go"
 description: "This guide will walk you through the technical implementation of writing a new Netdata collector in Golang, with tips on interfaces, structure, configuration files, and more."
-custom_edit_url: https://github.com/netdata/go.d.plugin/edit/master/docs/how-to-write-a-module.md
+custom_edit_url: "https://github.com/netdata/go.d.plugin/edit/master/docs/how-to-write-a-module.md"
+sidebar_label: "How to write a Netdata collector in Go"
+learn_status: "Published"
+learn_topic_type: "Tasks"
+learn_rel_path: "Developers"
+sidebar_position: 20
 -->
 
 # How to write a Netdata collector in Go
@@ -156,14 +161,14 @@ We recommend using one file per logical area. This approach makes it easier to m
 
 Suggested minimal layout:
 
-| Filename                                          | Contains                                                |
-| ------------------------------------------------- |-------------------------------------------------------- |
-| [`module_name.go`](#file-module_namego)           | Module configuration, implementation and registration.  |
-| [`charts.go`](#file-chartsgo)                     | Charts, charts templates and constructor functions.     |
-| [`init.go`](#file-initgo)                         | Initialization methods.                                 |
-| [`collect.go`](#file-collectgo)                   | Metrics collection implementation.                      |
-| [`module_name_test.go`](#file-module_name_testgo) | Public methods/functions tests.                         |
-| [`testdata/`](#file-module_name_testgo)           | Files containing sample data.                           |
+| Filename                                          | Contains                                               |
+|---------------------------------------------------|--------------------------------------------------------|
+| [`module_name.go`](#file-module_namego)           | Module configuration, implementation and registration. |
+| [`charts.go`](#file-chartsgo)                     | Charts, charts templates and constructor functions.    |
+| [`init.go`](#file-initgo)                         | Initialization methods.                                |
+| [`collect.go`](#file-collectgo)                   | Metrics collection implementation.                     |
+| [`module_name_test.go`](#file-module_name_testgo) | Public methods/functions tests.                        |
+| [`testdata/`](#file-module_name_testgo)           | Files containing sample data.                          |
 
 ### File `module_name.go`
 

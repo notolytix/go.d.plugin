@@ -1,18 +1,18 @@
 #### Setup Mongo
 
-Run the command ([image page](https://hub.docker.com/_/mongo)):
+- For a standalone setup, run the command ([image page](https://hub.docker.com/_/mongo)):
 
-```cmd
-docker run \
-  --name mongodb \
-  -d \
-  -p 27017:27017 \
-  mongo:5.0.0
-```
+  ```shell
+  docker run \
+    --name mongodb \
+    -d \
+    -p 27017:27017 \
+    mongo:5.0.0
+  ```
 
-### run the module
+- Replica set setup:
+  use [MongoDB packaged by Bitnami](https://github.com/bitnami/containers/tree/main/bitnami/mongodb#setting-up-replication) (
+  use `--net` instead of `--link`).
 
-```shell
-go build -o go.d.plugin github.com/netdata/go.d.plugin/cmd/godplugin
-go.d.plugin -d -m=mongodb
-```
+- Sharding setup:
+  use [MongoDB Sharded packaged by Bitnami](https://github.com/bitnami/containers/tree/main/bitnami/mongodb-sharded)

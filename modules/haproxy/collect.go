@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package haproxy
 
 import (
@@ -19,7 +21,7 @@ const (
 	metricBackendBytesOutTotal              = "haproxy_backend_bytes_out_total"
 )
 
-func isHaproxyMetrics(pms prometheus.Metrics) bool {
+func isHaproxyMetrics(pms prometheus.Series) bool {
 	for _, pm := range pms {
 		if strings.HasPrefix(pm.Name(), "haproxy_") {
 			return true
@@ -29,7 +31,7 @@ func isHaproxyMetrics(pms prometheus.Metrics) bool {
 }
 
 func (h *Haproxy) collect() (map[string]int64, error) {
-	pms, err := h.prom.Scrape()
+	pms, err := h.prom.ScrapeSeries()
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +105,7 @@ func (h *Haproxy) addDimToChart(chartID string, dim *module.Dim) {
 	chart.MarkNotCreated()
 }
 
-func multiplier(pm prometheus.Metric) float64 {
+func multiplier(pm prometheus.SeriesSample) float64 {
 	switch pm.Name() {
 	case metricBackendResponseTimeAverageSeconds,
 		metricBackendQueueTimeAverageSeconds:
@@ -113,7 +115,7 @@ func multiplier(pm prometheus.Metric) float64 {
 	return 1
 }
 
-func dimID(pm prometheus.Metric) string {
+func dimID(pm prometheus.SeriesSample) string {
 	proxy := pm.Labels.Get("proxy")
 	if proxy == "" {
 		return ""

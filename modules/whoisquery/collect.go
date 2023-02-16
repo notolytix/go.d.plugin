@@ -1,19 +1,23 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package whoisquery
 
-func (wq *WhoisQuery) collect() (map[string]int64, error) {
-	remainingTime, err := wq.prov.remainingTime()
+import "fmt"
+
+func (w *WhoisQuery) collect() (map[string]int64, error) {
+	remainingTime, err := w.prov.remainingTime()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v (source: %s)", err, w.Source)
 	}
 
 	mx := make(map[string]int64)
-	wq.collectExpiration(mx, remainingTime)
+	w.collectExpiration(mx, remainingTime)
+
 	return mx, nil
 }
 
-func (wq WhoisQuery) collectExpiration(mx map[string]int64, remainingTime float64) {
+func (w *WhoisQuery) collectExpiration(mx map[string]int64, remainingTime float64) {
 	mx["expiry"] = int64(remainingTime)
-	mx["days_until_expiration_warning"] = wq.DaysUntilWarn
-	mx["days_until_expiration_critical"] = wq.DaysUntilCrit
-
+	mx["days_until_expiration_warning"] = w.DaysUntilWarn
+	mx["days_until_expiration_critical"] = w.DaysUntilCrit
 }

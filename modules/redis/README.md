@@ -1,8 +1,11 @@
 <!--
 title: "Redis monitoring with Netdata"
 description: "Monitor the health and performance of Redis storage services with zero configuration, per-second metric granularity, and interactive visualizations."
-custom_edit_url: https://github.com/netdata/go.d.plugin/edit/master/modules/redis/README.md
+custom_edit_url: "https://github.com/netdata/go.d.plugin/edit/master/modules/redis/README.md"
 sidebar_label: "Redis"
+learn_status: "Published"
+learn_topic_type: "References"
+learn_rel_path: "Integrations/Monitor/Databases"
 -->
 
 # Redis monitoring with Netdata
@@ -18,54 +21,37 @@ It collects information and statistics about the server executing the following 
 
 - [`INFO ALL`](https://redis.io/commands/info)
 
-## Charts
+## Metrics
 
-### Connections
+All metrics have "redis." prefix.
 
-- Accepted and rejected (maxclients limit) connections in `connections/s`
-- Clients in `clients`
-
-### Memory
-
-- Memory usage in `bytes`
-- Ratio between used_memory_rss and used_memory in `ratio`
-
-### Network bandwidth
-
-- Bandwidth in `kilobits/s`
-
-### Replication
-
-- Connected replicas in `replicas`
-
-### Persistence RDB
-
-- Operations that produced changes since the last SAVE or BGSAVE in `operations`
-- Duration of the on-going RDB save operation if any in `seconds`
-- Status of the last RDB save operation in `status`
-
-### Persistence AOF
-
-- AOF file size in `bytes`
-
-### Commands
-
-- Processed commands in `queries/s`
-- Calls per command in `calls/s`
-- Total CPU time consumed by the commands in `usec`
-- Average CPU consumed per command execution in `usec/s`
-
-### Keyspace
-
-- Keys lookup hit rate in `percentage`
-- Evicted keys due to maxmemory limit in `keys/s`
-- Expired keys in `keys/s`
-- Keys per database in `keys`
-- Keys with an expiration per database in `keys`
-
-### Uptime
-
-- Uptime in `seconds`
+| Metric                          | Scope  |                   Dimensions                   |     Units      |
+|---------------------------------|:------:|:----------------------------------------------:|:--------------:|
+| connections                     | global |               accepted, rejected               | connections/s  |
+| clients                         | global | connected, blocked, tracking, in_timeout_table |    clients     |
+| ping_latency                    | global |                 min, max, avg                  |    seconds     |
+| commands                        | global |                   processes                    |   commands/s   |
+| keyspace_lookup_hit_rate        | global |                lookup_hit_rate                 |   percentage   |
+| memory                          | global |  max, used, rss, peak, dataset, lua, scripts   |     bytes      |
+| mem_fragmentation_ratio         | global |               mem_fragmentation                |     ratio      |
+| key_eviction_events             | global |                    evicted                     |     keys/s     |
+| net                             | global |                 received, sent                 |   kilobits/s   |
+| rdb_changes                     | global |                    changes                     |   operations   |
+| bgsave_now                      | global |              current_bgsave_time               |    seconds     |
+| bgsave_health                   | global |                  last_bgsave                   |     status     |
+| bgsave_last_rdb_save_since_time | global |                last_bgsave_time                |    seconds     |
+| aof_file_size                   | global |                 current, base                  |     bytes      |
+| commands_calls                  | global |         <i>a dimension per command</i>         |     calls      |
+| commands_usec                   | global |         <i>a dimension per command</i>         |  microseconds  |
+| commands_usec_per_sec           | global |         <i>a dimension per command</i>         | microseconds/s |
+| key_expiration_events           | global |                    expired                     |     keys/s     |
+| database_keys                   | global |        <i>a dimension per database</i>         |      keys      |
+| database_expires_keys           | global |        <i>a dimension per database</i>         |      keys      |
+| connected_replicas              | global |                   connected                    |    replicas    |
+| master_link_status              | global |                    up, down                    |     status     |
+| master_last_io_since_time       | global |                      time                      |    seconds     |
+| master_link_down_since_time     | global |                      time                      |    seconds     |
+| uptime                          | global |                     uptime                     |    seconds     |
 
 ## Configuration
 
@@ -78,6 +64,9 @@ sudo ./edit-config go.d/redis.conf
 ```
 
 There are two connection types: by tcp socket and by unix socket.
+
+> **Note**: If the Redis server is password protected via the `requirepass` option, make sure you have a colon before
+> the password.
 
 ```cmd
 # by tcp socket
@@ -94,6 +83,14 @@ jobs:
   - name: local
     address: 'redis://@127.0.0.1:6379'
 
+  - name: local
+    address: 'redis://:password@127.0.0.1:6379'
+
+  - name: local
+    address: 'redis://127.0.0.1:6379'
+    username: 'user'
+    password: 'password'
+
   - name: remote
     address: 'redis://user:password@203.0.113.0:6379'
 ```
@@ -106,17 +103,21 @@ collector's [configuration file](https://github.com/netdata/go.d.plugin/blob/mas
 To troubleshoot issues with the `redis` collector, run the `go.d.plugin` with the debug option enabled. The output
 should give you clues as to why the collector isn't working.
 
-First, navigate to your plugins directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on your
-system, open `netdata.conf` and look for the setting `plugins directory`. Once you're in the plugin's directory, switch
-to the `netdata` user.
+- Navigate to the `plugins.d` directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on
+  your system, open `netdata.conf` and look for the `plugins` setting under `[directories]`.
 
-```bash
-cd /usr/libexec/netdata/plugins.d/
-sudo -u netdata -s
-```
+  ```bash
+  cd /usr/libexec/netdata/plugins.d/
+  ```
 
-You can now run the `go.d.plugin` to debug the collector:
+- Switch to the `netdata` user.
 
-```bash
-./go.d.plugin -d -m redis
-```
+  ```bash
+  sudo -u netdata -s
+  ```
+
+- Run the `go.d.plugin` to debug the collector:
+
+  ```bash
+  ./go.d.plugin -d -m redis
+  ```

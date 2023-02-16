@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package httpcheck
 
 import (
@@ -20,8 +22,6 @@ const (
 func TestNew(t *testing.T) {
 	job := New()
 	assert.Implements(t, (*module.Module)(nil), job)
-	assert.Equal(t, defaultHTTPTimeout, job.Timeout.Duration)
-	assert.Equal(t, defaultAcceptedStatuses, job.AcceptedStatuses)
 }
 
 func TestHTTPCheck_Cleanup(t *testing.T) { New().Cleanup() }
@@ -52,7 +52,10 @@ func TestHTTPCheck_Check(t *testing.T) {
 }
 
 func TestHTTPCheck_Charts(t *testing.T) {
-	assert.NotNil(t, New().Charts())
+	job := New()
+	job.URL = testURL
+	require.True(t, job.Init())
+	assert.NotNil(t, job.Charts())
 }
 
 func TestHTTPCheck_Collect(t *testing.T) {
@@ -248,8 +251,7 @@ type clientFunc func(r *http.Request) (*http.Response, error)
 func (f clientFunc) Do(r *http.Request) (*http.Response, error) { return f(r) }
 
 func newClientFunc(resp *http.Response, err error) clientFunc {
-	f := func(r *http.Request) (*http.Response, error) { return resp, err }
-	return clientFunc(f)
+	return func(r *http.Request) (*http.Response, error) { return resp, err }
 }
 
 type nopCloser struct {

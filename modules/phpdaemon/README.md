@@ -1,8 +1,11 @@
 <!--
 title: "phpDaemon monitoring with Netdata"
 description: "Monitor the health and performance of phpDaemon workers with zero configuration, per-second metric granularity, and interactive visualizations."
-custom_edit_url: https://github.com/netdata/go.d.plugin/edit/master/modules/phpdaemon/README.md
+custom_edit_url: "https://github.com/netdata/go.d.plugin/edit/master/modules/phpdaemon/README.md"
 sidebar_label: "phpDaemon"
+learn_status: "Published"
+learn_topic_type: "References"
+learn_rel_path: "Integrations/Monitor/Apm"
 -->
 
 # phpDaemon monitoring with Netdata
@@ -16,6 +19,17 @@ This module collects `phpdaemon` workers statistics via http.
 
 - `phpdaemon` with enabled `http` server.
 - statistics should be reported in `json` format.
+
+## Metrics
+
+All metrics have "phpdaemon." prefix.
+
+| Metric        | Scope  |         Dimensions         |  Units  |
+|---------------|:------:|:--------------------------:|:-------:|
+| workers       | global |      alive, shutdown       | workers |
+| alive_workers | global |   idle, busy, reloading    | workers |
+| idle_workers  | global | preinit, init, initialized | workers |
+| uptime        | global |            time            | seconds |
 
 ## Charts
 
@@ -126,7 +140,7 @@ class FullStatusRequest extends Generic {
 To troubleshoot issues with the `phpdaemon` collector, run the `go.d.plugin` with the debug option enabled. The output
 should give you clues as to why the collector isn't working.
 
-First, navigate to your plugins directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on your
+First, navigate to your plugins' directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on your
 system, open `netdata.conf` and look for the setting `plugins directory`. Once you're in the plugin's directory, switch
 to the `netdata` user.
 

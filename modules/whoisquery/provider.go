@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package whoisquery
 
 import (
-	"fmt"
-	"regexp"
+	"strings"
 	"time"
 
 	"github.com/araddon/dateparse"
@@ -19,14 +20,8 @@ type fromNet struct {
 	client        *whois.Client
 }
 
-var reValidDomain = regexp.MustCompile(`^[a-zA-Z0-9\-]+\.[a-zA-Z0-9]+$`)
-
 func newProvider(config Config) (provider, error) {
 	domain := config.Source
-	if valid := reValidDomain.MatchString(domain); !valid {
-		return nil, fmt.Errorf("incorrect domain: %s, expected pattern: %s", domain, reValidDomain)
-	}
-
 	client := whois.NewClient()
 	client.SetTimeout(config.Timeout.Duration)
 
@@ -45,6 +40,13 @@ func (f *fromNet) remainingTime() (float64, error) {
 	result, err := whoisparser.Parse(raw)
 	if err != nil {
 		return 0, err
+	}
+
+	// https://community.netdata.cloud/t/whois-query-monitor-cannot-parse-expiration-time/3485
+	if strings.Contains(result.Domain.ExpirationDate, " ") {
+		if v, err := time.Parse("2006.01.02 15:04:05", result.Domain.ExpirationDate); err == nil {
+			return time.Until(v).Seconds(), nil
+		}
 	}
 
 	expire, err := dateparse.ParseAny(result.Domain.ExpirationDate)

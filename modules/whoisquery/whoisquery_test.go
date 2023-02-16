@@ -1,19 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package whoisquery
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/netdata/go.d.plugin/agent/module"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestNew(t *testing.T) {
-	whoisquery := New()
-
-	assert.Implements(t, (*module.Module)(nil), whoisquery)
-}
 
 func TestWhoisQuery_Cleanup(t *testing.T) {
 	New().Cleanup()
@@ -21,6 +16,8 @@ func TestWhoisQuery_Cleanup(t *testing.T) {
 
 func TestWhoisQuery_Charts(t *testing.T) {
 	whoisquery := New()
+	whoisquery.Source = "example.com"
+	require.True(t, whoisquery.Init())
 
 	assert.NotNil(t, whoisquery.Charts())
 }
@@ -38,14 +35,6 @@ func TestWhoisQuery_Init(t *testing.T) {
 		},
 		"empty source": {
 			config: Config{Source: ""},
-			err:    true,
-		},
-		"with http": {
-			config: Config{Source: "http://example.org"},
-			err:    true,
-		},
-		"with https": {
-			config: Config{Source: "https://example.org"},
 			err:    true,
 		},
 	}
@@ -87,6 +76,8 @@ func TestWhoisQuery_Check_ReturnsFalseOnProviderError(t *testing.T) {
 
 func TestWhoisQuery_Collect(t *testing.T) {
 	whoisquery := New()
+	whoisquery.Source = "example.com"
+	require.True(t, whoisquery.Init())
 	whoisquery.prov = &mockProvider{remTime: 12345}
 
 	collected := whoisquery.Collect()
@@ -104,6 +95,8 @@ func TestWhoisQuery_Collect(t *testing.T) {
 
 func TestWhoisQuery_Collect_ReturnsNilOnProviderError(t *testing.T) {
 	whoisquery := New()
+	whoisquery.Source = "example.com"
+	require.True(t, whoisquery.Init())
 	whoisquery.prov = &mockProvider{err: true}
 
 	assert.Nil(t, whoisquery.Collect())

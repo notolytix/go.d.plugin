@@ -1,19 +1,29 @@
 <!--
 title: "DNS query monitoring with Netdata"
 description: "Monitor the health and performance of DNS query round-trip time with zero configuration, per-second metric granularity, and interactive visualizations."
-custom_edit_url: https://github.com/netdata/go.d.plugin/edit/master/modules/dnsquery/README.md
+custom_edit_url: "https://github.com/netdata/go.d.plugin/edit/master/modules/dnsquery/README.md"
 sidebar_label: "DNS queries"
+learn_status: "Published"
+learn_topic_type: "References"
+learn_rel_path: "Integrations/Monitor/Networking"
 -->
 
 # DNS query monitoring with Netdata
 
-This module provides DNS query RTT in milliseconds.
+This module provides DNS query round-trip time (RTT).
 
-## Charts
+## Metrics
 
-It produces only one chart:
+All metrics have "dns_query." prefix.
 
-- Query Time in `milliseconds`
+Labels per scope:
+
+- server: server, network, record_type.
+
+| Metric       | Scope  |            Dimensions             |  Units  |
+|--------------|:------:|:---------------------------------:|:-------:|
+| query_time   | server |            query_time             | seconds |
+| query_status | server | success, network_error, dns_error | status  |
 
 ## Configuration
 
@@ -30,6 +40,9 @@ Here is an example:
 ```yaml
 jobs:
   - name: job1
+    record_types:
+      - A
+      - AAAA
     domains:
       - google.com
       - github.com
@@ -47,18 +60,21 @@ module [configuration file](https://github.com/netdata/go.d.plugin/blob/master/c
 To troubleshoot issues with the `dns_query` collector, run the `go.d.plugin` with the debug option enabled. The output
 should give you clues as to why the collector isn't working.
 
-First, navigate to your plugins directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on your
-system, open `netdata.conf` and look for the setting `plugins directory`. Once you're in the plugin's directory, switch
-to the `netdata` user.
+- Navigate to the `plugins.d` directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on
+  your system, open `netdata.conf` and look for the `plugins` setting under `[directories]`.
 
-```bash
-cd /usr/libexec/netdata/plugins.d/
-sudo -u netdata -s
-```
+  ```bash
+  cd /usr/libexec/netdata/plugins.d/
+  ```
 
-You can now run the `go.d.plugin` to debug the collector:
+- Switch to the `netdata` user.
 
-```bash
-./go.d.plugin -d -m dns_query
-```
+  ```bash
+  sudo -u netdata -s
+  ```
 
+- Run the `go.d.plugin` to debug the collector:
+
+  ```bash
+  ./go.d.plugin -d -m dns_query
+  ```
