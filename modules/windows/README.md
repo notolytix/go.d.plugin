@@ -8,7 +8,7 @@ learn_topic_type: "References"
 learn_rel_path: "Integrations/Monitor/System metrics"
 -->
 
-# Windows machine monitoring with Netdata
+# Windows machine collector
 
 This module will monitor one or more Windows machines, using
 the [windows_exporter](https://github.com/prometheus-community/windows_exporter).
@@ -38,6 +38,7 @@ The module collects metrics from the following collectors:
 - [netframework_clrlocksandthreads](https://github.com/prometheus-community/windows_exporter/blob/master/docs/collector.netframework_clrlocksandthreads.md)
 - [netframework_clrmemory](https://github.com/prometheus-community/windows_exporter/blob/master/docs/collector.netframework_clrmemory.md)
 - [netframework_clrremoting](https://github.com/prometheus-community/windows_exporter/blob/master/docs/collector.netframework_clrremoting.md)
+- [exchange](https://github.com/prometheus-community/windows_exporter/blob/master/docs/collector.exchange.md)
 
 ## Requirements
 
@@ -47,28 +48,22 @@ agent running on each host.
 
 To quickly test Netdata directly on a Windows machine, you can use
 the [Netdata MSI installer](https://github.com/netdata/msi-installer#instructions). The installer runs Netdata in a
-custom WSL deployment. WSL was not designed for production environments, so we do not recommend using the installer in
-production.
+custom WSL deployment. WSL was not designed for production environments, so **we do not recommend using the MSI installer in
+production**.
 
 For production use, you need to install Netdata on one or more nodes running Linux:
 
 - Install the
   latest [Prometheus exporter for Windows](https://github.com/prometheus-community/windows_exporter/releases)
-  on every Windows host you want to monitor.
+  on every Windows host you want to monitor, enabling the collectors listed here:
+  ```msiexec /i "[PATH_TO_MSI]" ENABLED_COLLECTORS=process,ad,adcs,adfs,cpu,dns,memory,mssql,net,os,tcp,logical_disk```
 - Get the installation commands from [Netdata Cloud](https://app.netdata.cloud) and install Netdata on one or more Linux
   nodes.
 - Configure each Netdata instance to collect data remotely, from several Windows hosts. Just add one job
   for each host to  `windows.conf`, as shown in the [configuration section](#configuration).
-- [Optional] [Disable all plugins](https://learn.netdata.cloud/docs/configure/common-changes#disable-a-collector-or-plugin)
-  except for go.d in `netdata.conf`, so that you only see Windows metrics.
-- [Optional] Set up [replication](https://learn.netdata.cloud/docs/agent/streaming), for high availability.
 
 Automated charts and alerts for your entire Windows infrastructure will be automatically generated.
 Each Windows host (data collection job) will be identifiable as an "instance" in the Netdata Cloud charts.
-
-### Windows Exporter Options
-
-Some `windows_exporter` collectors are [disabled by default](https://github.com/prometheus-community/windows_exporter#collectors). To enable a specific collector, pass its name as an argument to the `--collectors.enabled` option. See [examples](https://github.com/prometheus-community/windows_exporter#examples).
 
 ## Metrics
 
@@ -279,11 +274,47 @@ Labels per scope:
 | netframework.clrsecurity_checks_time                                 |       process        |                                                                                        time                                                                                        |    percentage     |
 | netframework.clrsecurity_stack_walk_depth                            |       process        |                                                                                       stack                                                                                        |       depth       |
 | netframework.clrsecurity_runtime_checks                              |       process        |                                                                                      runtime                                                                                       |     checks/s      |
+| exchange.activesync_ping_cmds_pending                                |        global        |                                                                                      pending                                                                                       |     commands      |
+| exchange.activesync_requests                                         |        global        |                                                                                      received                                                                                      |    requests/s     |
+| exchange.activesync_sync_cmds                                        |        global        |                                                                                     processed                                                                                      |    commands/s     |
+| exchange.autodiscover_requests                                       |        global        |                                                                                     processed                                                                                      |    requests/s     |
+| exchange.avail_service_requests                                      |        global        |                                                                                      serviced                                                                                      |    requests/s     |
+| exchange.owa_current_unique_users                                    |        global        |                                                                                     logged-in                                                                                      |       users       |
+| exchange.owa_requests_total                                          |        global        |                                                                                      handled                                                                                       |    requests/s     |
+| exchange.rpc_active_user_count                                       |        global        |                                                                                       active                                                                                       |       users       |
+| exchange.rpc_avg_latency                                             |        global        |                                                                                      latency                                                                                       |      seconds      |
+| exchange.rpc_connection_count                                        |        global        |                                                                                    connections                                                                                     |    connections    |
+| exchange.rpc_operations                                              |        global        |                                                                                     operations                                                                                     |   operations/s    |
+| exchange.rpc_requests                                                |        global        |                                                                                     processed                                                                                      |     requests      |
+| exchange.rpc_user_count                                              |        global        |                                                                                       users                                                                                        |       users       |
+| exchange.transport_queues_active_mail_box_delivery                   |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.transport_queues_external_active_remote_delivery            |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.transport_queues_external_largest_delivery                  |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.transport_queues_internal_active_remote_delivery            |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.transport_queues_internal_largest_delivery                  |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.transport_queues_retry_mailbox_delivery                     |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.transport_queues_poison                                     |        global        |                                                                               low, high,none,normal                                                                                |    messages/s     |
+| exchange.workload_active_tasks                                       |  exchange workload   |                                                                                       active                                                                                       |       tasks       |
+| exchange.workload_completed_tasks                                    |  exchange workload   |                                                                                     completed                                                                                      |      tasks/s      |
+| exchange.workload_queued_tasks                                       |  exchange workload   |                                                                                       queued                                                                                       |      tasks/s      |
+| exchange.workload_yielded_tasks                                      |  exchange workload   |                                                                                      yielded                                                                                       |      tasks/s      |
+| exchange.workload_activity_status                                    |  exchange workload   |                                                                                   active, paused                                                                                   |      status       |
+| exchange.ldap_long_running_ops_per_sec                               |     ldap process     |                                                                                    long-running                                                                                    |   operations/s    |
+| exchange.ldap_read_time                                              |     ldap process     |                                                                                        read                                                                                        |      seconds      |
+| exchange.ldap_search_time                                            |     ldap process     |                                                                                       search                                                                                       |      seconds      |
+| exchange.ldap_write_time                                             |     ldap process     |                                                                                       write                                                                                        |      seconds      |
+| exchange.ldap_timeout_errors                                         |     ldap process     |                                                                                      timeout                                                                                       |     errors/s      |
+| exchange.http_proxy_avg_auth_latency                                 |      http proxy      |                                                                                      latency                                                                                       |      seconds      |
+| exchange.http_proxy_avg_cas_processing_latency_sec                   |      http proxy      |                                                                                      latency                                                                                       |      seconds      |
+| exchange.http_proxy_mailbox_proxy_failure_rate                       |      http proxy      |                                                                                      failures                                                                                      |    percentage     |
+| exchange.http_proxy_mailbox_server_locator_avg_latency_sec           |      http proxy      |                                                                                      latency                                                                                       |      seconds      |
+| exchange.http_proxy_outstanding_proxy_requests                       |      http proxy      |                                                                                    outstanding                                                                                     |     requests      |
+| exchange.http_proxy_requests_total                                   |      http proxy      |                                                                                     processed                                                                                      |    requests/s     |
 
 ## Configuration
 
 Edit the `go.d/windows.conf` configuration file using `edit-config` from the
-Netdata [config directory](https://learn.netdata.cloud/docs/configure/nodes), which is typically at `/etc/netdata`.
+Netdata [config directory](https://github.com/netdata/netdata/blob/master/docs/configure/nodes.md#the-netdata-config-directory), which is typically at `/etc/netdata`.
 
 ```bash
 cd /etc/netdata # Replace this path with your Netdata config directory
@@ -307,10 +338,32 @@ and on the right side menu of the agent UI charts.
 For all available options please see
 module [configuration file](https://github.com/netdata/go.d.plugin/blob/master/config/go.d/windows.conf).
 
+### Virtual Nodes
+
+Netdata’s new virtual nodes functionality allows you to define nodes in configuration files and have them be treated as regular nodes in all of the UI, dashboards, tabs, filters etc. For example, you can create a virtual node each for all your Windows machines and monitor them as discrete entities. Virtual nodes can help you simplify your infrastructure monitoring and focus on the individual node that matters.
+
+To define your windows server a virtual node you need to:
+
+  * Define virtual nodes in `/etc/netdata/vnodes/vnodes.conf`
+
+    ```yaml
+    - hostname: win_server1
+      guid: <value>
+    ```
+    Just remember to use a valid guid (On Linux you can use `uuidgen` command to generate one, on Windows just use the `[guid]::NewGuid()` command in PowerShell)
+    
+  * Add the vnode config to the windows monitoring job we created earlier, see higlighted line below:
+    ```yaml
+      jobs:
+        - name: win_server1
+          vnode: win_server1
+          url: http://203.0.113.10:9182/metrics
+    ```
+
 ## Troubleshooting
 
-To troubleshoot issues with the `windows` collector, run the `go.d.plugin` with the debug option enabled. The output should
-give you clues as to why the collector isn't working.
+To troubleshoot issues with the `windows` collector, run the `go.d.plugin` with the debug option enabled. The output
+should give you clues as to why the collector isn't working.
 
 - Navigate to the `plugins.d` directory, usually at `/usr/libexec/netdata/plugins.d/`. If that's not the case on
   your system, open `netdata.conf` and look for the `plugins` setting under `[directories]`.

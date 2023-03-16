@@ -12,6 +12,7 @@ import (
 	"github.com/netdata/go.d.plugin/agent/job/discovery"
 	"github.com/netdata/go.d.plugin/agent/job/discovery/dummy"
 	"github.com/netdata/go.d.plugin/agent/job/discovery/file"
+	"github.com/netdata/go.d.plugin/agent/job/vnode"
 	"github.com/netdata/go.d.plugin/agent/module"
 
 	"gopkg.in/yaml.v2"
@@ -33,7 +34,7 @@ type config struct {
 	Modules    map[string]bool `yaml:"modules"`
 }
 
-func (c config) String() string {
+func (c *config) String() string {
 	return fmt.Sprintf("enabled '%v', default_run '%v', max_procs '%d'",
 		c.Enabled, c.DefaultRun, c.MaxProcs)
 }
@@ -171,15 +172,33 @@ func (a *Agent) buildDiscoveryConf(enabled module.Registry) discovery.Config {
 	}
 }
 
-func (c config) isExplicitlyEnabled(moduleName string) bool {
+func (a *Agent) setupVnodeRegistry() *vnode.Registry {
+	a.Infof("looking for 'vnodes/' in %v", a.VnodesConfDir)
+
+	if len(a.VnodesConfDir) == 0 {
+		return nil
+	}
+
+	dirPath, err := a.VnodesConfDir.Find("vnodes/")
+	if err != nil || dirPath == "" {
+		return nil
+	}
+
+	reg := vnode.NewRegistry(dirPath)
+	a.Infof("found '%s' (%d vhosts)", dirPath, reg.Len())
+
+	return reg
+}
+
+func (c *config) isExplicitlyEnabled(moduleName string) bool {
 	return c.isEnabled(moduleName, true)
 }
 
-func (c config) isImplicitlyEnabled(moduleName string) bool {
+func (c *config) isImplicitlyEnabled(moduleName string) bool {
 	return c.isEnabled(moduleName, false)
 }
 
-func (c config) isEnabled(moduleName string, explicit bool) bool {
+func (c *config) isEnabled(moduleName string, explicit bool) bool {
 	if enabled, ok := c.Modules[moduleName]; ok {
 		return enabled
 	}

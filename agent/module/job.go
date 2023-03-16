@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/netdata/go.d.plugin/agent/job/vnode"
 	"github.com/netdata/go.d.plugin/agent/netdataapi"
 	"github.com/netdata/go.d.plugin/logger"
 )
@@ -69,6 +70,10 @@ type JobConfig struct {
 	UpdateEvery     int
 	AutoDetectEvery int
 	Priority        int
+
+	VnodeGUID     string
+	VnodeHostname string
+	VnodeLabels   map[string]string
 }
 
 const (
@@ -96,6 +101,10 @@ func NewJob(cfg JobConfig) *Job {
 		tick:            make(chan int),
 		buf:             &buf,
 		api:             netdataapi.New(&buf),
+
+		vnodeGUID:     cfg.VnodeGUID,
+		vnodeHostname: cfg.VnodeHostname,
+		vnodeLabels:   cfg.VnodeLabels,
 	}
 }
 
@@ -130,6 +139,11 @@ type Job struct {
 	prevRun time.Time
 
 	stop chan struct{}
+
+	vnodeCreated  bool
+	vnodeGUID     string
+	vnodeHostname string
+	vnodeLabels   map[string]string
 }
 
 // NetdataChartIDMaxLength is the chart ID max length. See RRD_ID_LENGTH_MAX in the netdata source code.
@@ -250,6 +264,10 @@ func (j *Job) Cleanup() {
 		return
 	}
 
+	if !vnode.Disabled {
+		_ = j.api.HOST(j.vnodeGUID)
+	}
+
 	if j.runChart.created {
 		j.runChart.MarkRemove()
 		j.createChart(j.runChart)
@@ -262,6 +280,7 @@ func (j *Job) Cleanup() {
 			}
 		}
 	}
+
 	if j.buf.Len() > 0 {
 		writeLock.Lock()
 		_, _ = io.Copy(j.out, j.buf)
@@ -340,6 +359,15 @@ func (j *Job) collect() (result map[string]int64) {
 }
 
 func (j *Job) processMetrics(metrics map[string]int64, startTime time.Time, sinceLastRun int) bool {
+	if !vnode.Disabled {
+		if !j.vnodeCreated && j.vnodeGUID != "" {
+			_ = j.api.HOSTINFO(j.vnodeGUID, j.vnodeHostname, j.vnodeLabels)
+			j.vnodeCreated = true
+		}
+
+		_ = j.api.HOST(j.vnodeGUID)
+	}
+
 	if !ndInternalMonitoringDisabled && !j.runChart.created {
 		j.runChart.ID = fmt.Sprintf("execution_time_of_%s", j.FullName())
 		j.createChart(j.runChart)
@@ -378,6 +406,7 @@ func (j *Job) processMetrics(metrics map[string]int64, startTime time.Time, sinc
 	if !ndInternalMonitoringDisabled {
 		j.updateChart(j.runChart, map[string]int64{"time": elapsed}, sinceLastRun)
 	}
+
 	return true
 }
 
