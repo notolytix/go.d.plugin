@@ -113,15 +113,42 @@ var masterCharts = Charts{
 	},
 }
 
+var regionCharts = Charts{
+	{
+		ID:    "master_regions",
+		Title: "Region Servers",
+		Units: "Count",
+		Fam:   "master",
+		Ctx:   "hbase.regions",
+		Type:  module.Line,
+		Dims: Dims{
+			{ID: "master_number_of_regions", Name: "regions"},
+			{ID: "master_number_of_dead_regions", Name: "dead_regions"},
+		},
+	},
+	{
+		ID:    "cluster_requests",
+		Title: "Cluster Requests",
+		Units: "Count",
+		Fam:   "master",
+		Ctx:   "hbase.requests",
+		Type:  module.Line,
+		Dims: Dims{
+			{ID: "master_cluster_requests", Name: "Requests", Algo: module.Incremental},
+		},
+	},
+}
+
 func regionserverCharts() *Charts {
 	charts := Charts{}
 	panicIfError(charts.Add(*jvmCharts.Copy()...))
+	panicIfError(charts.Add(*regionCharts.Copy()...))
 	return &charts
 }
 
 func masterServerCharts() *Charts {
 	charts := Charts{}
-	//panicIfError(charts.Add(*jvmCharts.Copy()...))
+	panicIfError(charts.Add(*jvmCharts.Copy()...))
 	panicIfError(charts.Add(*masterCharts.Copy()...))
 	return &charts
 }

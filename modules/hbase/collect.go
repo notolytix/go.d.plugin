@@ -90,7 +90,7 @@ func (h HBase) collectMaster(mx *metrics, raw rawJMX) {
 func (h HBase) collectRegionServer(mx *metrics, raw rawJMX) {
 	err := h.collectJVM(mx, raw)
 	if err != nil {
-		h.Debugf("error on collecting jvm : %v", err)
+		h.Debugf("error on collecting region server metrics : %v", err)
 	}
 }
 
